@@ -1,27 +1,43 @@
 # PXU030 Portfolio Optimization
 
-An independent portfolio-optimization research and visualization project associated with daily data covering **2020-01-01 through 2022-12-02**.
+A research and visualization artifact for minimum-variance portfolio analysis associated with daily data covering **2020-01-01 through 2022-12-02**.
 
-## Repository contents
+> **Research status:** this repository currently publishes a saved HTML analysis artifact. The complete end-to-end data and optimization workflow is not yet documented, so the artifact should not be treated as an independently reproducible benchmark or investment recommendation.
 
-- **[`min-var.html`](min-var.html)** — a large HTML artifact associated with the project's minimum-variance analysis. Download it and open it in a modern desktop browser to inspect the saved artifact locally.
+## Contents
 
-## Current scope and reproducibility
+| File | Description |
+|---|---|
+| [min-var.html](min-var.html) | Saved HTML artifact associated with the minimum-variance analysis; open it in a modern desktop browser |
 
-The currently published repository contains the HTML artifact but does not yet document the complete data source, preprocessing steps, optimization constraints, parameter choices, or an end-to-end script that reproduces the output. Those details should be documented before the artifact is used as evidence for quantitative performance claims or adapted for professional decisions.
+## Scope
 
-A more reproducible release should include:
-1. A description of the data source, symbols/series, frequency, date range, and any missing-data handling.
-2. The exact objective function, constraints, estimation window, and parameter choices.
-3. A clear run environment and step-by-step reproduction instructions.
-4. Validation checks and appropriately scoped in-sample/out-of-sample analysis, where applicable.
+The project concerns portfolio optimization and visualization. Portfolio outputs can change materially with the selected instruments, return calculation, lookback window, constraints, missing-data handling, and transaction-cost assumptions.
 
-## Important note
+This repository is an independent analytical demonstration. It is not investment advice, and an optimization result is not a promise of future performance.
 
-This repository is an independent analytical demonstration, not investment advice. An optimization output is sensitive to data quality, assumptions, constraints, and period selection; it should not be interpreted as a promise of future performance.
+## Reproducibility status
 
-## Related Quantix projects
+The current published material does not yet document all of the following:
 
+- Original market-data source, instrument identifiers, frequency, and data license
+- Data cleaning, corporate-action treatment, missing-value handling, and return calculation
+- Objective function, constraints, estimation window, and optimizer settings
+- Dependencies and a reproducible command that regenerates the HTML artifact
+- Validation checks and out-of-sample analysis, including transaction-cost assumptions
+
+These should be completed before reporting quantitative performance or presenting the result as evidence for a real-world allocation decision.
+
+## Suggested environment
+
+The repository currently centers on the saved HTML artifact. No complete installation or end-to-end regeneration procedure is claimed here until the original analysis code and dependencies are documented.
+
+## Related projects
+
+- [BIOGAS RS-PIM Engine](https://github.com/000MAK/biogas-rspim-engine)
 - [Quantix — 100 Mini Python Projects](https://github.com/000MAK/quantix-100-new-mini-projects)
-- [Mini CSV Cleaner](https://github.com/000MAK/mini-csv-cleaner)
 - [All public repositories](https://github.com/000MAK?tab=repositories)
+
+## License and data
+
+Check the repository's license files before reuse. Confirm the source and redistribution terms for any market data associated with the artifact; no market-data rights are implied by sharing the HTML file.
