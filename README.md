@@ -28,9 +28,12 @@ The current published material does not yet document all of the following:
 
 These should be completed before reporting quantitative performance or presenting the result as evidence for a real-world allocation decision.
 
-## Suggested environment
+## Suggested next steps
 
-The repository currently centers on the saved HTML artifact. No complete installation or end-to-end regeneration procedure is claimed here until the original analysis code and dependencies are documented.
+1. Document the data source, column schema, frequency, and license.
+2. Add source code and an environment file that reproduce the artifact from permitted data.
+3. Include a small synthetic example and tests for the optimization constraints.
+4. Report assumptions, baseline comparisons, and appropriately scoped out-of-sample evaluation.
 
 ## Related projects
 
@@ -40,4 +43,4 @@ The repository currently centers on the saved HTML artifact. No complete install
 
 ## License and data
 
-Check the repository's license files before reuse. Confirm the source and redistribution terms for any market data associated with the artifact; no market-data rights are implied by sharing the HTML file.
+At the time this README was updated, no LICENSE file was found in this repository. Without an explicit license, public visibility does not by itself grant permission to reuse or redistribute the project. Add a license if you intend to permit reuse, and document the source and redistribution terms for any market data associated with the artifact.
