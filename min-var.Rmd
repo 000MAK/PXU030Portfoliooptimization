@@ -1,0 +1,292 @@
+---
+title: "min var"
+output: html_document
+date: "2022-11-18"
+---
+
+<!-- Reconstructed from the code shown in min-var.html (knitted 2022-11-18 with echo = TRUE). -->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tibble)
+library(tidyr)
+library(tidyquant) # To download the data
+```
+
+```{r}
+library(plotly) # To create interactive charts
+```
+
+```{r}
+library(timetk)
+library(forcats)
+```
+
+```{r}
+symbols <- c("AKBNK.IS","AKSEN.IS","ARCLK.IS","ASELS.IS","BIMAS.IS","EKGYO.IS","EREGL.IS","FROTO.IS",
+             "GARAN.IS",
+"GUBRF.IS"  ,"HEKTS.IS","ISCTR.IS","KCHOL.IS","KOZAA.IS","KOZAL.IS","KRDMD.IS","PETKM.IS","PGSUS.IS",
+"SAHOL.IS","SASA.IS","SISE.IS","TAVHL.IS","TCELL.IS","THYAO.IS","TKFEN.IS","TOASO.IS","TTKOM.IS","TUPRS.IS",
+"VESTL.IS","YKBNK.IS")
+```
+
+```{r}
+prices <- quantmod::getSymbols(
+  Symbols =symbols,
+  src = "yahoo",
+  from = "2020-01-01",
+  auto.assign = TRUE,
+  warnings = FALSE
+) %>%
+  # The map function takes an anonymous function and will return a list of five
+  # The function Ad() extracts the daily adjusted price series
+  purrr::map(.f = ~ quantmod::Ad(get(x = .x))) %>%
+  # Use reduce() to merge the elements of .x interactively
+  purrr::reduce(.f = merge) %>%
+  # Use a replacement function to set column names to ticker symbols
+  # This function is in prefix form
+  # It is equivalent to colnames(x = prices) <- value
+  `colnames<-`(value = symbols)
+```
+
+```{r}
+# Keep only the last reading of each month
+# We could have chosen to keep only the first reading of each month
+asset_returns_xts <- xts::to.daily(
+  x = prices,
+  drop.time = TRUE,
+  indexAt = "lastof",
+  OHLC = FALSE
+) %>%
+  # Compute simple returns
+  # Log returns are time-additive but not portfolio additive
+  PerformanceAnalytics::Return.calculate(method = "discrete") %>%
+  # Drop the first row since we lose 12/31/2012
+  stats::na.omit()
+# Keep only the xts returns, ticker symbols, and the prices series
+rm(list = setdiff(x = ls(), y = c("symbols", "prices", "asset_returns_xts")))
+```
+
+```{r}
+# Visualize cumulative returns
+chart.CumReturns(asset_returns_xts, main = "Cumulative returns of ETFs", legend.loc = "topleft")
+```
+
+```{r}
+mean_ret <- colMeans(asset_returns_xts)
+print(round(mean_ret, 5))
+```
+
+```{r}
+cov_mat <- cov(asset_returns_xts) * 252
+
+print(round(cov_mat,4))
+```
+
+```{r}
+# Visualize cumulative returns
+chart.CumReturns(asset_returns_xts, main = "Cumulative returns of ETFs", legend.loc = "topleft")
+```
+
+```{r}
+wts <- runif(n = length(symbols))
+print(wts)
+```
+
+```{r}
+print(sum(wts))
+```
+
+```{r}
+wts <- wts/sum(wts)
+print(wts)
+```
+
+```{r}
+sum(wts)
+```
+
+```{r}
+port_returns <- (sum(wts * mean_ret) + 1)^252 - 1
+port_risk <- sqrt(t(wts) %*% (cov_mat %*% wts))
+print(port_risk)
+```
+
+```{r}
+# Since Risk free rate is 0% 
+
+sharpe_ratio <- port_returns/port_risk
+print(sharpe_ratio)
+```
+
+```{r}
+# Calculate the random weights
+wts <- runif(n = length(symbols))
+wts <- wts/sum(wts)
+
+# Calculate the portfolio returns
+port_returns <- (sum(wts * mean_ret) + 1)^252 - 1
+
+# Calculate the portfolio risk
+port_risk <- sqrt(t(wts) %*% (cov_mat %*% wts))
+
+# Calculate the Sharpe Ratio
+sharpe_ratio <- port_returns/port_risk
+
+print(wts)
+```
+
+```{r}
+print(port_returns)
+```
+
+```{r}
+print(port_risk)
+```
+
+```{r}
+print(sharpe_ratio)
+```
+
+```{r}
+num_port <- 50000
+
+# Creating a matrix to store the weights
+
+all_wts <- matrix(nrow = num_port,
+                  ncol = length(symbols))
+
+# Creating an empty vector to store
+# Portfolio returns
+
+port_returns <- vector('numeric', length = num_port)
+
+# Creating an empty vector to store
+# Portfolio Standard deviation
+
+port_risk <- vector('numeric', length = num_port)
+
+# Creating an empty vector to store
+# Portfolio Sharpe Ratio
+
+sharpe_ratio <- vector('numeric', length = num_port)
+
+for (i in seq_along(port_returns)) {
+  
+  wts <- runif(length(symbols))
+  wts <- wts/sum(wts)
+  
+  # Storing weight in the matrix
+  all_wts[i,] <- wts
+  
+  # Portfolio returns
+  
+  port_ret <- sum(wts * mean_ret)
+  port_ret <- ((port_ret + 1)^252) - 1
+  
+  # Storing Portfolio Returns values
+  port_returns[i] <- port_ret
+  
+  
+  # Creating and storing portfolio risk
+  port_sd <- sqrt(t(wts) %*% (cov_mat  %*% wts))
+  port_risk[i] <- port_sd
+  
+  # Creating and storing Portfolio Sharpe Ratios
+  # Assuming 0% Risk free rate
+  
+  sr <- port_ret/port_sd
+  sharpe_ratio[i] <- sr
+  
+}
+
+# Storing the values in the table
+portfolio_values <- tibble(Return = port_returns,
+                           Risk = port_risk,
+                           SharpeRatio = sharpe_ratio)
+
+
+# Converting matrix to a tibble and changing column names
+all_wts <- tk_tbl(all_wts)
+```
+
+```{r}
+colnames(all_wts) <- colnames(asset_returns_xts)
+
+# Combing all the values together
+portfolio_values <- tk_tbl(cbind(all_wts, portfolio_values))
+```
+
+```{r}
+head(portfolio_values)
+```
+
+```{r}
+min_var <- portfolio_values[which.min(portfolio_values$Risk),]
+max_sr <- portfolio_values[which.max(portfolio_values$SharpeRatio),]
+min_var
+```
+
+```{r}
+p <- min_var %>%
+  gather(AKBNK.IS:YKBNK.IS, key = Asset,
+         value = Weights) %>%
+  mutate(Asset = as.factor(Asset)) %>%
+  ggplot(aes(x = fct_reorder(Asset,Weights), y = Weights, fill = Asset)) +
+  geom_bar(stat = 'identity') +
+
+
+
+
+theme_minimal() +
+  labs(x = 'Assets', y = 'Weights', title = "Minimum Variance Portfolio Weights") +
+  scale_y_continuous(labels = scales::percent) 
+
+ggplotly(p)
+```
+
+```{r}
+max_sr
+```
+
+```{r}
+p <- max_sr %>%
+  gather(AKBNK.IS:YKBNK.IS,  key = Asset,
+         value = Weights) %>%
+  mutate(Asset = as.factor(Asset)) %>%
+  ggplot(aes(x = fct_reorder(Asset,Weights), y = Weights, fill = Asset)) +
+  geom_bar(stat = 'identity') +
+  theme_minimal() +
+  labs(x = 'Assets', y = 'Weights', title = "Tangency Portfolio Weights") +
+  scale_y_continuous(labels = scales::percent) 
+
+ggplotly(p)
+```
+
+```{r}
+p <- portfolio_values %>%
+  ggplot(aes(x = Risk, y = Return, color = SharpeRatio)) +
+  geom_point() +
+  theme_classic() +
+  scale_y_continuous(labels = scales::percent) +
+  scale_x_continuous(labels = scales::percent) +
+  labs(x = 'Annualized Risk',
+       y = 'Annualized Returns',
+       title = "Portfolio Optimization & Efficient Frontier") +
+  geom_point(aes(x = Risk,
+                 y = Return), data = min_var, color = 'red') +
+  geom_point(aes(x = Risk,
+                 y = Return), data = max_sr, color = 'red') +
+  annotate('text', x = 0.29, y =1.31 , label = "Tangency Portfolio") +
+  annotate('text', x =0.27 , y =0.82 , label = "Minimum variance portfolio") +
+  annotate(geom = 'segment', x =0.29 , xend = 0.29,  y =1.1 , 
+           yend =1.10 , color = 'red', arrow = arrow(type = "open")) +
+  annotate(geom = 'segment', x =0.50 , xend =0.50 ,  y =1.1 , 
+           yend =1.10 , color = 'red', arrow = arrow(type = "open"))
+
+
+ggplotly(p)
+```

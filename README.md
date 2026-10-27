@@ -2,13 +2,23 @@
 
 A research and visualization artifact for minimum-variance portfolio analysis associated with daily data covering **2020-01-01 through 2022-12-02**.
 
-> **Research status:** this repository currently publishes a saved HTML analysis artifact. The complete end-to-end data and optimization workflow is not yet documented, so the artifact should not be treated as an independently reproducible benchmark or investment recommendation.
+> **Research status:** a 2022 coursework-style analysis. The R Markdown source and its rendered HTML are both published; rerunning it downloads current Yahoo Finance data, so numbers will differ from the saved HTML. Not a benchmark or investment recommendation.
 
 ## Contents
 
 | File | Description |
 |---|---|
-| [min-var.html](min-var.html) | Saved HTML artifact associated with the minimum-variance analysis; open it in a modern desktop browser |
+| [min-var.Rmd](min-var.Rmd) | R Markdown source of the analysis, reconstructed from the code shown in the HTML (it was knitted with `echo = TRUE`, so every code chunk is preserved verbatim) |
+| [min-var.html](min-var.html) | Rendered output from 2022-11-18 (11.8 MB, too large for GitHub's preview; download and open it in a desktop browser) |
+
+## Method
+
+- **Universe:** 30 large-cap Borsa Istanbul stocks (AKBNK, AKSEN, ARCLK, ASELS, BIMAS … YKBNK).
+- **Data:** daily prices from Yahoo Finance via `tidyquant`/`quantmod`, from 2020-01-01; daily simple returns; annualised with 252 trading days. (A code comment mentions month-end prices, but the code uses daily data.)
+- **Optimisation:** Monte Carlo search over 50,000 random long-only, fully invested weight vectors; the minimum-variance and maximum-Sharpe portfolios are picked from the sample. The Sharpe ratio uses no risk-free rate.
+- **Caveats:** random search approximates, but does not exactly solve, the minimum-variance problem; there is no out-of-sample test, transaction costs or rebalancing.
+
+To rerun: open `min-var.Rmd` in RStudio with `tibble`, `tidyr`, `tidyquant`, `plotly`, `timetk`, `forcats`, `PerformanceAnalytics` and `ggplot2` installed, and knit.
 
 ## Scope
 
@@ -18,13 +28,12 @@ This repository is an independent analytical demonstration. It is not investment
 
 ## Reproducibility status
 
-The current published material does not yet document all of the following:
+Documented now: data source, universe, return calculation, objective, constraints and the full code. Still missing:
 
-- Original market-data source, instrument identifiers, frequency, and data license
-- Data cleaning, corporate-action treatment, missing-value handling, and return calculation
-- Objective function, constraints, estimation window, and optimizer settings
-- Dependencies and a reproducible command that regenerates the HTML artifact
-- Validation checks and out-of-sample analysis, including transaction-cost assumptions
+- Yahoo Finance terms and a frozen copy of the price data (rerunning fetches today's data)
+- Corporate-action and missing-value handling beyond `na.omit()`
+- An exact optimiser (e.g. quadratic programming) to compare with the random search
+- Out-of-sample evaluation and transaction-cost assumptions
 
 These should be completed before reporting quantitative performance or presenting the result as evidence for a real-world allocation decision.
 
